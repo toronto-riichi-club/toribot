@@ -14,21 +14,22 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out the source code...
+        uses: actions/checkout@v3
 
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version: "latest"
 
-      - name: Install depedencies
+      - name: Install dependencies
         run: npm install
         
-      - name: Build check
+      - name: TORI Build check
         run: npm run build
       
-      - name: Test check
+      - name: TORI Test check
         run: npm run test
         
-      - name: Lint check
+      - name: TORI Lint check
         run: npm run lint
