@@ -25,10 +25,10 @@ jobs:
         run: npm install
         
       - name: Build check
-        run: npm build
+        run: npm run build
       
       - name: Test check
-        run: npm test
+        run: npm run test
         
       - name: Lint check
-        run: npm lint
+        run: npm run lint
