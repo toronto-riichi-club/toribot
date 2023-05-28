@@ -2,7 +2,10 @@
 
 Discord bot of the Toronto Riichi Club.
 
-**Work in progress**
+## Setup
+Use your preferred package manager (npm, yarn, etc.) to grab the dependencies onto your local machine.
+
+Please use the latest Node version.
 
 ## License
 
