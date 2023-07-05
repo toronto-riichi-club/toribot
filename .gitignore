@@ -1,0 +1,10 @@
+# Environment variables
+.DS_Store
+.env
+
+# Generated output
+dist/
+prisma/migrations/
+
+# Packages
+node_modules/

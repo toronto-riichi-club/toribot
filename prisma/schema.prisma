@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum InPersonGameLocation {
+    PEEL     @map("PEEL")
+    TORONTO  @map("TORONTO")
+    WATERLOO @map("WATERLOO")
+    YORK     @map("YORK")
+}
+
+enum InPersonGameType {
+    EAST          @map("EAST")
+    POTLUCK_EAST  @map("POTLUCK_EAST")
+    POTLUCK_SOUTH @map("POTLUCK_SOUTH")
+    SANMA_EAST    @map("SANMA_EAST")
+    SANMA_SOUTH   @map("SANMA_SOUTH")
+    SOUTH         @map("SOUTH")
+    SPACE_EAST    @map("SPACE_EAST")
+    SPACE_SOUTH   @map("SPACE_SOUTH")
+}
+
+model Guild {
+    guildId       BigInt    @id @map("guild_id")
+    inPersonCount Int       @default(0) @map("in_person_count")
+    onlineCount   Int       @default(0) @map("online_count")
+    createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+    updatedAt     DateTime? @updatedAt @map("updated_at") @db.Timestamptz()
+
+    @@map("guild")
+}
+
+model InPersonGame {
+    guildId          BigInt               @map("guild_id")
+    id               Int
+    playerOneId      String               @map("player_one_id")
+    playerTwoId      String               @map("player_two_id")
+    playerThreeId    String               @map("player_three_id")
+    playerFourId     String?              @map("player_four_id")
+    playerOneScore   Int                  @map("player_one_score")
+    playerTwoScore   Int                  @map("player_two_score")
+    playerThreeScore Int                  @map("player_three_score")
+    playerFourScore  Int?                 @map("player_four_score")
+    location         InPersonGameLocation
+    type             InPersonGameType     @default(SOUTH)
+    notes            String?              @map("notes")
+    date             DateTime             @default(now()) @db.Date()
+    createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+    updatedAt        DateTime?            @updatedAt @map("updated_at") @db.Timestamptz()
+
+    @@id([guildId, id])
+    @@map("in_person_game")
+}
+
+model OnlineGame {
+    guildId   BigInt    @map("guild_id")
+    id        Int
+    url       String
+    date      DateTime  @default(now()) @db.Date()
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+    updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz()
+
+    @@id([guildId, id])
+    @@map("online_game")
+}
+
+model Tag {
+    guildId BigInt @map("guild_id")
+    keyword String
+    aliases String[]
+    content String
+
+    @@id([guildId, keyword])
+    @@map("tag")
+}
