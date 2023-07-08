@@ -1,0 +1,19 @@
+{
+    "env": {
+        "es6": true,
+        "es2022": true,
+        "node": true
+    },
+    "extends": [
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": true,
+        "tsconfigRootDir": "./src"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "root": true
+}
