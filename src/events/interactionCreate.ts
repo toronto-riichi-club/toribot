@@ -57,6 +57,7 @@ export async function handleInteractionCreate(client: ToribotClient, payload: Wi
         case InteractionType.ApplicationCommandAutocomplete: {
             const interaction = new ChatInputCommandInteraction({
                 data: data as APIChatInputApplicationCommandInteractionData,
+                guildId,
                 username: member.user.username,
                 ...baseOptions
             })

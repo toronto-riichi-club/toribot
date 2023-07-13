@@ -10,12 +10,14 @@ import { BaseInteraction } from './BaseInteraction.js'
 
 export class ChatInputCommandInteraction extends BaseInteraction {
     readonly data: APIChatInputApplicationCommandInteractionData
+    readonly guildId: string
     readonly username: string
 
-    public constructor({ data, username, ...baseOptions }: ChatInputCommandInteractionOptions) {
+    public constructor({ data, guildId, username, ...baseOptions }: ChatInputCommandInteractionOptions) {
         super(baseOptions)
 
         this.data = data
+        this.guildId = guildId
         this.username = username
     }
 

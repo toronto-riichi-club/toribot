@@ -30,7 +30,7 @@ export interface ChatInputCommand {
     run(client: ToribotClient, interaction: ChatInputCommandInteraction): Promise<void>
 }
 
-export type ChatInputCommandInteractionOptions = WithBaseInteractionOptions<APIChatInputApplicationCommandInteractionData>
+export type ChatInputCommandInteractionOptions = WithBaseInteractionOptions<APIChatInputApplicationCommandInteractionData> & { guildId: string }
 
 export interface Modal {
     handle(client: ToribotClient, interaction: ModalSubmitInteraction): Promise<void>

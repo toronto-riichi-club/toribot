@@ -1,3 +1,4 @@
+import { Cache, Database } from '#structs'
 import { BOT_TOKEN } from '#utility'
 import { Client, GatewayIntentBits } from '@discordjs/core'
 import { REST } from '@discordjs/rest'
@@ -11,8 +12,14 @@ const gateway = new WebSocketManager({
 })
 
 export class ToribotClient extends Client {
+    readonly cache: Cache
+    readonly database: Database
+
     public constructor() {
         super({ rest, gateway })
+
+        this.cache = new Cache()
+        this.database = new Database()
     }
 
     public async login() {
