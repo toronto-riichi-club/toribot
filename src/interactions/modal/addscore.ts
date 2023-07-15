@@ -4,19 +4,18 @@ import type { APIEmbed } from '@discordjs/core'
 import type { GameLocation, GameType } from '@prisma/client'
 
 export const AddScoreModal: Modal = {
-    async handle(client: ToribotClient, interaction: ModalInteraction): Promise<void> {
+    async run(client: ToribotClient, interaction: ModalInteraction): Promise<void> {
         await interaction.defer()
 
         let embed: Partial<APIEmbed> = { color: 0xF8F8FF }
 
-        const values = interaction.values()
         const usernames: string[] = [interaction.username]
         const scores: number[] = []
 
         let totalScore = 0
 
-        for (const [index, [username, submittedScore]] of values.entries()) {
-            if ((index === 4) && !submittedScore?.length) {
+        for (const [index, [username, submittedScore]] of interaction.values().entries()) {
+            if (!submittedScore?.length) {
                 scores.push(0)
                 continue
             }
@@ -25,30 +24,80 @@ export const AddScoreModal: Modal = {
                 ? 'The leftover points'
                 : `The score for ${username}`
 
-            if (!/^((0|-?100,?000|-?([1-9]|[1-9]\d?,?\d)00)|(-?(0?\.[1-9]|100(\.0)?|([1-9]\d?(\.\d)?))k?))$/g.test(submittedScore)) {
-                embed.description = `${prefix} is in an invalid format.`
-
-                await interaction.updateReply({ embeds: [embed] })
-                return
-            }
-
             if (index !== 4)
                 usernames.push(username)
 
-            const score = Number(submittedScore.replace(/[^0-9.]/g, '')) * 1_000
+            let submittedScoreSanitized = submittedScore.replace(/\s,/g, '')
 
-            scores.push(score)
-            totalScore += score
+            const hasPeriod = submittedScoreSanitized.includes('.')
+            const hasLetterK = submittedScoreSanitized.includes('k')
 
-            if (totalScore > 100_000) {
-                embed.description = 'The total score exceeds 100,000 points. Please ensure that all scores sum to a maximum of 100,000 points.'
+            let errorMessage
+
+            if (!hasPeriod && !hasLetterK) {
+                submittedScoreSanitized = submittedScoreSanitized.replace(/^0+/, '')
+
+                const [, num, zeroes] = [...submittedScoreSanitized.matchAll(/^(\d*[^-0])(0*)$/g)]?.[0] ?? []
+
+                if (!/^-?\d+$/g.test(num))
+                    errorMessage =`${prefix} must be a valid integer.`
+                else if (Math.abs(parseInt(num)) > 100)
+                    errorMessage = `${prefix} must be at or below 100,000.`
+
+                const zeroesPart = zeroes?.length
+                    ? zeroes
+                    : '000'
+
+                submittedScoreSanitized = num.concat(zeroesPart)
+            } else if (!hasPeriod && hasLetterK) {
+                submittedScoreSanitized = submittedScoreSanitized.replace(/k/g, '')
+
+                if (!/^-?\d+$/g.test(submittedScoreSanitized))
+                    errorMessage =`${prefix} must be a valid integer.`
+                else if (Math.abs(parseInt(submittedScoreSanitized)) > 100)
+                    errorMessage = `${prefix} must be at or below 100,000.`
+
+                submittedScoreSanitized = submittedScoreSanitized.concat('000')
+            } else if (hasPeriod && !hasLetterK) {
+                submittedScoreSanitized = submittedScoreSanitized
+                    .replace(/\./g, '')
+                    .concat('00')
+
+                if (!/^-?\d+$/g.test(submittedScoreSanitized))
+                    errorMessage =`${prefix} must be a valid integer.`
+                else if (Math.abs(parseInt(submittedScoreSanitized)) > 100_000)
+                    errorMessage = `${prefix} must be at or below 100,000.`
+            } else {
+                submittedScoreSanitized = submittedScoreSanitized
+                    .replace(/[\.k]/g, '')
+                    .concat('00')
+
+                if (!/^-?\d+$/g.test(submittedScoreSanitized))
+                    errorMessage =`${prefix} must be a valid integer.`
+                else if (Math.abs(parseInt(submittedScoreSanitized)) > 100_000)
+                    errorMessage = `${prefix} must be at or below 100,000.`
+            }
+            if (errorMessage?.length) {
+                embed.description = errorMessage
 
                 await interaction.updateReply({ embeds: [embed] })
                 return
             }
+
+            const score = Number(submittedScoreSanitized)
+            
+            scores.push(score)
+            totalScore += score
         }
 
-        const [, location, type] = interaction.data.custom_id.split(':')
+        if (totalScore !== 100_000) {
+            embed.description = 'The total score does not sum to 100,000 points.'
+
+            await interaction.updateReply({ embeds: [embed] })
+            return
+        }
+
+        const [, location, type] = interaction.customId.split(':')
         const gameId = await client.database.games.insertGame(
             usernames[0],
             usernames[1],
@@ -74,7 +123,7 @@ export const AddScoreModal: Modal = {
                     return { score: scores[index], username: Boolean(cachedPlayer) ? `<@${cachedPlayer.toString()}>` : username }
                 })
                 .sort((a, b) => b.score - a.score)
-                .map(({ score, username }) => `${username} - ${score}`)
+                .map(({ score, username }) => `${score} - ${username}`)
                 .join('\n'),
             fields: scores[4]
                 ? [{ inline: false, name: 'Leftover points', value: scores[4].toString() }]

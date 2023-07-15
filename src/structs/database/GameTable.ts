@@ -7,7 +7,7 @@ import type {
 export class GameTable {
     #prisma: PrismaClient
 
-    public constructor(prisma: PrismaClient) {
+    constructor(prisma: PrismaClient) {
         this.#prisma = prisma
     }
 

@@ -9,21 +9,33 @@ import {
 import type { REST } from '@discordjs/rest'
 
 export class BaseInteraction {
-    protected readonly applicationId: string
-    readonly id: string
-    protected readonly rest: REST
-    protected readonly token: string
+    #applicationId: string
+    #id: string
+    #rest: REST
+    #token: string
 
-    public constructor({ applicationId, id, rest, token }: BaseInteractionOptions) {
-        this.applicationId = applicationId
-        this.id = id
-        this.rest = rest
-        this.token = token
+    constructor({ applicationId, id, rest, token }: BaseInteractionOptions) {
+        this.#applicationId = applicationId
+        this.#id = id
+        this.#rest = rest
+        this.#token = token
     }
 
-    public async defer({ ephemeral }: { ephemeral?: boolean } = { ephemeral: false }): Promise<void> {
-        await this.rest.post(
-            Routes.interactionCallback(this.id, this.token),
+    get id() {
+        return this.#id
+    }
+
+    get rest() {
+        return this.#rest
+    }
+
+    get token() {
+        return this.#token
+    }
+
+    async defer({ ephemeral }: { ephemeral?: boolean } = { ephemeral: false }): Promise<void> {
+        await this.#rest.post(
+            Routes.interactionCallback(this.#id, this.#token),
             {
                 auth: false,
                 body: {
@@ -36,9 +48,9 @@ export class BaseInteraction {
         )
     }
 
-    public async reply({ ...data }: Pick<APIInteractionResponseCallbackData, 'content' | 'components' | 'embeds' | 'flags'> = {}): Promise<void> {
-        await this.rest.post(
-            Routes.interactionCallback(this.id, this.token),
+    async reply({ ...data }: Pick<APIInteractionResponseCallbackData, 'content' | 'components' | 'embeds' | 'flags'> = {}): Promise<void> {
+        await this.#rest.post(
+            Routes.interactionCallback(this.#id, this.#token),
             {
                 auth: false,
                 body: {
@@ -49,16 +61,19 @@ export class BaseInteraction {
         )
     }
 
-    public async response(): Promise<APIMessage> {
-        const message = await this.rest.get(Routes.webhookMessage(this.applicationId, this.token)) as APIMessage
+    async response(): Promise<APIMessage> {
+        const message = await this.#rest.get(Routes.webhookMessage(this.#applicationId, this.#token)) as APIMessage
 
         return message
     }
 
-    public async updateReply({ ...body }: Pick<APIInteractionResponseCallbackData, 'content' | 'components' | 'embeds' | 'flags'> = {}): Promise<void> {
-        await this.rest.patch(
-            Routes.webhookMessage(this.applicationId, this.token),
-            { auth: false, body }
+    async updateReply({ ...body }: Pick<APIInteractionResponseCallbackData, 'content' | 'components' | 'embeds' | 'flags'> = {}): Promise<void> {
+        await this.#rest.patch(
+            Routes.webhookMessage(this.#applicationId, this.#token),
+            {
+                auth: false,
+                body
+            }
         )
     }
 }

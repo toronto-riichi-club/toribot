@@ -35,9 +35,8 @@
         "clean-build": "npm run clean && npm run build",
         "dev": "npm run clean-build && npm run start",
         "lint": "npx eslint \"src/*\" --fix --ext .ts",
-        "prod": "npm run clean-build && npm run start:prod",
-        "start": "node -r dotenv/config dist/index.js",
-        "start:prod": "node -r dotenv/config dist/index.js"
+        "prod": "npm run clean-build && npm run start",
+        "start": "node -r dotenv/config dist/index.js"
     },
     "type": "module",
     "version": "0.1.0"

@@ -1,3 +1,4 @@
+import { BaseInteraction } from '#structs'
 import type { AutocompleteFocusedOption, ChatInputCommandInteractionOptions } from '#types/interaction'
 import {
     type APIApplicationCommandOptionChoice,
@@ -6,22 +7,31 @@ import {
     InteractionResponseType,
     Routes
 } from '@discordjs/core'
-import { BaseInteraction } from './BaseInteraction.js'
 
 export class ChatInputCommandInteraction extends BaseInteraction {
-    readonly data: APIChatInputApplicationCommandInteractionData
-    readonly guildId: string
-    readonly username: string
+    #data: APIChatInputApplicationCommandInteractionData
+    #guildId: string
 
-    public constructor({ data, guildId, username, ...baseOptions }: ChatInputCommandInteractionOptions) {
-        super(baseOptions)
+    constructor(options: ChatInputCommandInteractionOptions) {
+        super(options)
 
-        this.data = data
-        this.guildId = guildId
-        this.username = username
+        this.#data = options.data
+        this.#guildId = options.guildId
     }
 
-    public async autocomplete(choices: APIApplicationCommandOptionChoice<number | string>[]): Promise<void> {
+    get guildId() {
+        return this.#guildId
+    }
+
+    get name() {
+        return this.#data.name
+    }
+
+    get options() {
+        return this.#data.options
+    }
+
+    async autocomplete(choices: APIApplicationCommandOptionChoice<number | string>[]): Promise<void> {
         await this.rest.post(
             Routes.interactionCallback(this.id, this.token),
             {
@@ -36,13 +46,13 @@ export class ChatInputCommandInteraction extends BaseInteraction {
         )
     }
 
-    public getFocusedOption<T extends AutocompleteFocusedOption>(): T {
-        const option = this.data.options.find(o => ('focused' in o) && Boolean(o.focused)) as T
+    getFocusedOption<T extends AutocompleteFocusedOption>(): T {
+        const option = this.#data.options.find(o => ('focused' in o) && Boolean(o.focused)) as T
 
         return option
     }
 
-    public async replyWithModal(data: APIModalInteractionResponseCallbackData): Promise<void> {
+    async replyWithModal(data: APIModalInteractionResponseCallbackData): Promise<void> {
         await this.rest.post(
             Routes.interactionCallback(this.id, this.token),
             {

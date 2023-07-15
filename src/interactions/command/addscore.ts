@@ -99,7 +99,7 @@ export const AddScoreCommand: ChatInputCommand = {
             { value: playerFour },
             { value: location },
             { value: type = GameType.HANCHAN } = {}
-        ] = interaction.data.options as APIApplicationCommandInteractionDataStringOption[]
+        ] = interaction.options as APIApplicationCommandInteractionDataStringOption[]
         const uniquePlayers = [...new Set([playerOne, playerTwo, playerThree, playerFour])]
         const embed: Partial<APIEmbed> = { color: 0xF8F8FF }
 

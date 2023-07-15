@@ -5,20 +5,19 @@ import {
     ModalInteraction,
     type ToribotClient,
 } from '#structs'
+import type { BaseInteractionOptions } from '#types/interaction'
 import {
-    type APIChatInputApplicationCommandInteractionData,
     type APIEmbed,
     type GatewayInteractionCreateDispatchData,
     MessageFlags,
-    PermissionFlagsBits,
     InteractionType,
     type WithIntrinsicProps,
+    ApplicationCommandType,
 } from '@discordjs/core'
 
 export async function handleInteractionCreate(client: ToribotClient, payload: WithIntrinsicProps<GatewayInteractionCreateDispatchData>) {
     const {
         application_id: applicationId,
-        app_permissions,
         data,
         guild_id: guildId,
         id,
@@ -26,7 +25,12 @@ export async function handleInteractionCreate(client: ToribotClient, payload: Wi
         token,
         type,
     } = payload.data
-    const baseOptions = { applicationId, id, rest: client.rest, token }
+    const baseOptions: BaseInteractionOptions = {
+        applicationId,
+        id,
+        rest: client.rest,
+        token
+    }
     const baseInteraction = new BaseInteraction(baseOptions)
     const embed: Partial<APIEmbed> = { color: 0xF8F8FF }
 
@@ -37,39 +41,29 @@ export async function handleInteractionCreate(client: ToribotClient, payload: Wi
         return
     }
 
-    const permissions = BigInt(app_permissions)
-    const missingPermissions = []
-
-    if ((permissions & PermissionFlagsBits.SendMessages) !== PermissionFlagsBits.SendMessages)
-        missingPermissions.push("**Send Messages**")
-    if ((permissions & PermissionFlagsBits.EmbedLinks) !== PermissionFlagsBits.EmbedLinks)
-        missingPermissions.push("**Embed Links**")
-
-    if (missingPermissions.length) {
-        embed.description = `toribot requires the ${ new Intl.ListFormat().format(missingPermissions) } ${ missingPermissions.length === 1 ? 'permission': 'permissions' } in order to run this command.`
-
-        await baseInteraction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral })
-        return
-    }
-
     switch (type) {
         case InteractionType.ApplicationCommand:
         case InteractionType.ApplicationCommandAutocomplete: {
-            const interaction = new ChatInputCommandInteraction({
-                data: data as APIChatInputApplicationCommandInteractionData,
-                guildId,
-                username: member.user.username,
-                ...baseOptions
-            })
-            const { name } = interaction.data
-            const command = commands.get(name)
+            if (data.type !== ApplicationCommandType.ChatInput) {
+                embed.description = `I have received an unknown command with the name "${ data.name }".`
 
-            if (!command) {
-                embed.description = `I have received an unknown command with the name "${ name }".`
+                await baseInteraction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral })
+            } else {
+                const interaction = new ChatInputCommandInteraction({
+                    data,
+                    guildId,
+                    ...baseOptions
+                })
+                const { name } = interaction
+                const command = commands.get(name)
 
-                await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral })
-            } else
-                await command.run(client, interaction)
+                if (!command) {
+                    embed.description = `I have received an unknown command with the name "${ name }".`
+
+                    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral })
+                } else
+                    await command.run(client, interaction)
+            }
 
             break
         }
@@ -79,7 +73,7 @@ export async function handleInteractionCreate(client: ToribotClient, payload: Wi
                 username: member.user.username,
                 ...baseOptions
             })
-            const key = interaction.data.custom_id.split(':')[0]
+            const key = interaction.customId.split(':')[0]
             const modal = modals.get(key)
 
             if (!modal) {
@@ -87,7 +81,7 @@ export async function handleInteractionCreate(client: ToribotClient, payload: Wi
 
                 await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral })
             } else
-                await modal.handle(client, interaction)
+                await modal.run(client, interaction)
 
             break
         }

@@ -15,14 +15,14 @@ export class ToribotClient extends Client {
     readonly cache: Cache
     readonly database: Database
 
-    public constructor() {
+    constructor() {
         super({ rest, gateway })
 
         this.cache = new Cache()
         this.database = new Database()
     }
 
-    public async login() {
+    async login() {
         await gateway.connect()
     }
 }

@@ -1,15 +1,15 @@
 import type {
     ChatInputCommandInteraction,
-    ModalSubmitInteraction,
-    ToribotClient,
+    ModalInteraction,
+    ToribotClient
 } from '#structs'
 import type {
     APIApplicationCommandInteractionDataIntegerOption,
     APIApplicationCommandInteractionDataNumberOption,
     APIApplicationCommandInteractionDataStringOption,
+    APIApplicationCommandOption,
     APIChatInputApplicationCommandInteractionData,
     APIModalSubmission,
-    ModalSubmitInteraction
 } from '@discordjs/core'
 import type { REST } from '@discordjs/rest'
 
@@ -18,27 +18,28 @@ export type AutocompleteFocusedOption =
     | APIApplicationCommandInteractionDataNumberOption
     | APIApplicationCommandInteractionDataStringOption
 
-export type BaseInteractionOptions = {
-    applicationId: string,
-    id: string,
-    rest: REST,
+export interface BaseInteractionOptions {
+    applicationId: string
+    id: string
+    rest: REST
     token: string
 }
 
 export interface ChatInputCommand {
-    getCommand(): RESTPostAPIApplicationCommandsJSONBody
+    getCommand(): APIApplicationCommandOption | RESTPostAPIApplicationCommandsJSONBody
     run(client: ToribotClient, interaction: ChatInputCommandInteraction): Promise<void>
 }
 
-export type ChatInputCommandInteractionOptions = WithBaseInteractionOptions<APIChatInputApplicationCommandInteractionData> & { guildId: string }
-
-export interface Modal {
-    handle(client: ToribotClient, interaction: ModalSubmitInteraction): Promise<void>
+export interface ChatInputCommandInteractionOptions extends BaseInteractionOptions {
+    data: APIChatInputApplicationCommandInteractionData
+    guildId: string
 }
 
-export type ModalInteractionOptions = WithBaseInteractionOptions<APIModalSubmission>
+export interface Modal {
+    run(client: ToribotClient, interaction: ModalInteraction): Promise<void>
+}
 
-export interface WithBaseInteractionOptions<T extends APIChatInputApplicationCommandInteractionData | APIModalSubmission> extends BaseInteractionOptions {
-    data: T,
+export interface ModalInteractionOptions extends BaseInteractionOptions {
+    data: APIModalSubmission
     username: string
 }

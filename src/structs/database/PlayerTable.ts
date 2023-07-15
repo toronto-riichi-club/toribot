@@ -3,7 +3,7 @@ import type { Player, PrismaClient } from '@prisma/client'
 export class PlayerTable {
     #prisma: PrismaClient
 
-    public constructor(prisma: PrismaClient) {
+    constructor(prisma: PrismaClient) {
         this.#prisma = prisma
     }
 

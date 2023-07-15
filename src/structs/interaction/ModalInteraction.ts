@@ -3,18 +3,26 @@ import { BaseInteraction } from './BaseInteraction.js'
 import type { APIModalSubmission } from '@discordjs/core'
 
 export class ModalInteraction extends BaseInteraction {
-    readonly data: APIModalSubmission
-    readonly username: string
+    #data: APIModalSubmission
+    #username: string
 
-    public constructor({ data, username, ...baseOptions }: ModalInteractionOptions) {
-        super(baseOptions)
+    constructor(options: ModalInteractionOptions) {
+        super(options)
 
-        this.data = data
-        this.username = username
+        this.#data = options.data
+        this.#username = options.username
     }
 
-    public values(): [string, string][] {
-        const entries = this.data.components.map(component => {
+    get customId() {
+        return this.#data.custom_id
+    }
+
+    get username() {
+        return this.#username
+    }
+
+    values(): [string, string][] {
+        const entries = this.#data.components.map(component => {
             const { custom_id, value } = component.components[0]
 
             return [custom_id, value] as [string, string]
