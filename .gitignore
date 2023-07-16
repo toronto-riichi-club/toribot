@@ -4,6 +4,7 @@
 
 # Generated output
 dist/
+prisma/migrations/
 
 # Packages
 node_modules/

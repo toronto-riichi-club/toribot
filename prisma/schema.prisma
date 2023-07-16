@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum GameLocation {
+    PEEL     @map("PEEL")
+    TORONTO  @map("TORONTO")
+    WATERLOO @map("WATERLOO")
+    YORK     @map("YORK")
+}
+
+enum GameType {
+    HANCHAN @map("HANCHAN")
+}
+
+model Game {
+    id               Int          @id @default(autoincrement())
+    submitter        String
+    playerOne        String       @map("player_one")
+    playerTwo        String       @map("player_two")
+    playerThree      String       @map("player_three")
+    playerFour       String       @map("player_four")
+    playerOneScore   Int          @map("player_one_score")
+    playerTwoScore   Int          @map("player_two_score")
+    playerThreeScore Int          @map("player_three_score")
+    playerFourScore  Int          @map("player_four_score")
+    leftoverPoints   Int          @map("leftover_points")
+    location         GameLocation
+    type             GameType     @default(HANCHAN)
+    createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+    updatedAt        DateTime?    @updatedAt @map("updated_at") @db.Timestamptz()
+
+    @@map("game")
+}
+
+model Player {
+    username String  @unique
+    userId   BigInt? @map("user_id")
+
+    @@map("player")
+}

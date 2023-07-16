@@ -25,6 +25,13 @@
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
         "outDir": "dist",
+        "paths": {
+            "#events": ["./src/events/index"],
+            "#interactions": ["./src/interactions/index"],
+            "#structs": ["./src/structs/index"],
+            "#types/*": ["./src/types/*.d.ts"],
+            "#utility": ["./src/utility/index"]
+        },
 		"preserveConstEnums": true,
 		"pretty": true,
 		"removeComments": false,

@@ -1,7 +1,12 @@
 {
     "author": "Toronto Riichi Club",
     "dependencies": {
-        "dotenv": "^16.3.1"
+        "@discordjs/core": "^0.6.0",
+        "@discordjs/rest": "^1.7.1",
+        "@discordjs/ws": "^0.8.3",
+        "@prisma/client": "^5.0.0",
+        "dotenv": "^16.3.1",
+        "prisma": "^5.0.0"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.61.0",
@@ -14,6 +19,13 @@
         "node": ">=18.1.6",
         "npm": ">=9.8.0"
     },
+    "imports": {
+        "#events": "./dist/events/index.js",
+        "#interactions": "./dist/interactions/index.js",
+        "#structs": "./dist/structs/index.js",
+        "#types/*": "./dist/types/*.d.ts",
+        "#utility": "./dist/utility/index.js"
+    },
     "license": "MIT",
     "main": "dist/index.js",
     "name": "toribot",
@@ -23,9 +35,8 @@
         "clean-build": "npm run clean && npm run build",
         "dev": "npm run clean-build && npm run start",
         "lint": "npx eslint \"src/*\" --fix --ext .ts",
-        "prod": "npm run clean-build && npm run start:prod",
-        "start": "node -r dotenv/config dist/index.js",
-        "start:prod": "node -r dotenv/config dist/index.js"
+        "prod": "npm run clean-build && npm run start",
+        "start": "node -r dotenv/config dist/index.js"
     },
     "type": "module",
     "version": "0.1.0"
